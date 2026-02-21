@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "outputDirectory": "dist",
-  "root": "my-react-app"
+  "buildCommand": "cd my-react-app && npm run build",
+  "installCommand": "cd my-react-app && npm install",
+  "outputDirectory": "my-react-app/dist"
 }
