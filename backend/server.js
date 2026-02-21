@@ -15,6 +15,11 @@ import SocketServer from './socketServer.js';
 
 dotenv.config();
 
+// Increase mongoose buffer timeout to reduce "buffering timed out" false-positives
+import mongoosePkg from 'mongoose';
+const { set: mongooseSet } = mongoosePkg;
+mongooseSet && mongooseSet('bufferTimeoutMS', parseInt(process.env.MONGO_BUFFER_TIMEOUT_MS || '30000'));
+
 // Check for required environment variables
 if (!process.env.JWT_SECRET) {
   console.error('❌ ERROR: JWT_SECRET is not set in .env file!');
@@ -37,6 +42,16 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// DB readiness middleware: return 503 for API routes when DB isn't connected yet
+app.use((req, res, next) => {
+  // allow health checks and test routes even if DB is not ready
+  if (req.path === '/api/health' || req.path.startsWith('/api/test')) return next();
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: 'Database not connected. Try again later.' });
+  }
+  next();
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

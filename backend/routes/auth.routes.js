@@ -102,6 +102,10 @@ router.post('/register', [
       }
     });
   } catch (error) {
+    // If the error is related to Mongoose server selection or buffering, respond 503
+    if (error && (error.name === 'MongooseServerSelectionError' || /buffering timed out/i.test(error.message || ''))) {
+      return res.status(503).json({ error: 'Database unavailable. Please try again later.' });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -190,6 +194,9 @@ router.post('/login', [
       }
     });
   } catch (error) {
+    if (error && (error.name === 'MongooseServerSelectionError' || /buffering timed out/i.test(error.message || ''))) {
+      return res.status(503).json({ error: 'Database unavailable. Please try again later.' });
+    }
     res.status(500).json({ error: error.message });
   }
 });
