@@ -67,7 +67,8 @@ app.get('/api/health', (req, res) => {
     message: 'MedIQ API is running',
     hasMongoDbUri: !!process.env.MONGODB_URI,
     hasJwtSecret: !!process.env.JWT_SECRET,
-    mongooseConnected: mongoose.connection.readyState === 1 ? 'yes' : 'no'
+    mongooseConnected: mongoose.connection.readyState === 1 ? 'yes' : 'no',
+    mongoDbUriPreview: process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 70) + '...' : 'NOT SET'
   });
 });
 
