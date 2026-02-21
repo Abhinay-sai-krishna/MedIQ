@@ -110,31 +110,53 @@ httpServer.listen(PORT, () => {
   }, 2000); // Wait 2 seconds for everything to initialize
 });
 
+// Parse MONGODB_URI and remove embedded timeouts (set them via Mongoose instead)
+let cleanMongoDbUri = MONGODB_URI;
+if (cleanMongoDbUri.includes('?')) {
+  cleanMongoDbUri = cleanMongoDbUri.replace(/[&?](maxPoolSize|serverSelectionTimeoutMS|socketTimeoutMS)=[^&]*/g, '');
+  // Remove trailing & or ?
+  cleanMongoDbUri = cleanMongoDbUri.replace(/[&?]$/, '');
+}
+
 // Connect to MongoDB with better error handling
 console.log('🔄 Attempting MongoDB connection...');
-console.log(`   URI: ${MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`);
+console.log(`   URI: ${cleanMongoDbUri.replace(/\/\/.*@/, '//***:***@')}`);
 
-mongoose.connect(MONGODB_URI, {
+const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 15000,
-  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: 20000,  // Increase to 20 seconds for Vercel
+  socketTimeoutMS: 60000,           // Increase to 60 seconds for Vercel
+  connectTimeoutMS: 20000,
   maxPoolSize: 10
-})
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-    console.log(`📊 Database: ${mongoose.connection.name}`);
-    console.log(`🔗 Connection String: ${MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`);
-  })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error.message);
-    console.error('Stack:', error.stack);
-    console.error('\n📝 Troubleshooting steps:');
-    console.error('1. Check MONGODB_URI in Vercel environment variables');
-    console.error('2. Verify MongoDB Atlas Network Access allows the connecting IP');
-    console.error('3. Check if credentials in connection string are correct');
-    console.error('4. Verify maxPoolSize and timeout settings are appropriate');
-  });
+};
+
+let connectionAttempt = 0;
+const maxRetries = 3;
+
+function attemptConnection() {
+  connectionAttempt++;
+  console.log(`   Attempt ${connectionAttempt}/${maxRetries}...`);
+  
+  mongoose.connect(cleanMongoDbUri, mongooseOptions)
+    .then(() => {
+      console.log('✅ Connected to MongoDB');
+      console.log(`📊 Database: ${mongoose.connection.name}`);
+    })
+    .catch((error) => {
+      console.error(`❌ Connection attempt ${connectionAttempt} failed:`, error.message);
+      
+      if (connectionAttempt < maxRetries) {
+        console.log(`   Retrying in 5 seconds...`);
+        setTimeout(attemptConnection, 5000);
+      } else {
+        console.error('\n⚠️  MongoDB connection failed after retries');
+        console.error('   This endpoint will return 503 for DB-dependent routes');
+      }
+    });
+}
+
+attemptConnection();
 
 // MongoDB connection event handlers
 mongoose.connection.on('disconnected', () => {
