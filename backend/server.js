@@ -33,6 +33,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mediq';
 
+console.log('📋 Environment Check:');
+console.log(`   - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ present' : '❌ missing'}`);
+console.log(`   - MONGODB_URI: ${process.env.MONGODB_URI ? '✅ present' : '❌ missing (using default)'}`);
+console.log(`   - FRONTEND_URL: ${process.env.FRONTEND_URL ? '✅ present' : '❌ missing'}`);
+console.log(`   - MONGO_BUFFER_TIMEOUT_MS: ${process.env.MONGO_BUFFER_TIMEOUT_MS || 'default (30000)'}`);
+
+
 // Middleware
 app.use(helmet());
 app.use(cors({
@@ -55,7 +62,13 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'Online', message: 'MedIQ API is running' });
+  res.json({ 
+    status: 'Online', 
+    message: 'MedIQ API is running',
+    hasMongoDbUri: !!process.env.MONGODB_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    mongooseConnected: mongoose.connection.readyState === 1 ? 'yes' : 'no'
+  });
 });
 
 // Routes
