@@ -696,7 +696,7 @@ function DoctorDashboard() {
   const checkPhoneStatus = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/test/sms/my-phone-status', {
+      const response = await fetch(`${API_URL}/api/test/sms/my-phone-status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -715,7 +715,7 @@ function DoctorDashboard() {
     setTestingAlert(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/test/sms/trigger-emergency-alert', {
+      const response = await fetch(`${API_URL}/api/test/sms/trigger-emergency-alert`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1133,7 +1133,7 @@ function PatientDashboard() {
   const fetchPatientInfo = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/patient/profile', {
+      const response = await fetch(`${API_URL}/api/patient/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -1162,7 +1162,7 @@ function PatientDashboard() {
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/patient/reports', {
+      const response = await fetch(`${API_URL}/api/patient/reports`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -1634,7 +1634,7 @@ function PatientDashboard() {
       
       // Try to fetch from backend first
       try {
-        const response = await fetch(`http://localhost:5000/api/patient/reports/${report._id}/download`, {
+        const response = await fetch(`${API_URL}/api/patient/reports/${report._id}/download`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -2396,7 +2396,7 @@ function ExplainableAlerts() {
       
       if (alert.actionPrimary === 'Notify Rapid Response Team') {
         // Trigger emergency SMS alert
-        const response = await fetch('http://localhost:5000/api/test/sms/trigger-emergency-alert', {
+        const response = await fetch(`${API_URL}/api/test/sms/trigger-emergency-alert`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2417,7 +2417,7 @@ function ExplainableAlerts() {
         }
       } else if (alert.actionPrimary === 'Request ICU Transfer') {
         // Trigger ward overload alert
-        const response = await fetch('http://localhost:5000/api/test/sms/test-ward-alert', {
+        const response = await fetch(`${API_URL}/api/test/sms/test-ward-alert`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2509,7 +2509,7 @@ function PatientChartModal({ patientId, onClose }) {
       try {
         const token = localStorage.getItem('token')
         // Try to fetch from API first
-        const response = await fetch(`http://localhost:5000/api/doctor/patients/${patientId}`, {
+        const response = await fetch(`${API_URL}/api/doctor/patients/${patientId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -3026,7 +3026,7 @@ function PatientReportsManager() {
   const fetchPatients = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/doctor/patients', {
+      const response = await fetch(`${API_URL}/api/doctor/patients`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -3192,7 +3192,7 @@ function PatientReportsManager() {
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(
-        `http://localhost:5000/api/doctor/patients/${selectedPatient._id}/reports`,
+        `${API_URL}/api/doctor/patients/${selectedPatient._id}/reports`,
         {
           method: 'POST',
           headers: {
